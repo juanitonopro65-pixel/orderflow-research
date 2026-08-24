@@ -96,3 +96,43 @@ people talk themselves into leverage.
 
 That is a backtest. Live, the same strategy's gated signals returned −$231
 across 7 trades.
+
+## Does a larger account fix this?
+
+The natural intuition is that a $150k account has room a $25k account does not,
+so the same system could finally make real money. That intuition is correct for
+a system with positive expectancy and backwards for one without.
+
+This system's measured expectancy is **−$5.74 per trade** at one contract.
+Account size does not change expectancy; contract count multiplies it. Applying
+the real daily results to a $150k evaluation (target +$9,000, max loss $4,500
+end-of-day trailing):
+
+| contracts | P&L over the 8 real days | worst drawdown | outcome |
+|---:|---:|---:|---|
+| 1 | −$430 | $510 | survives, losing |
+| 2 | −$860 | $1,020 | survives, losing |
+| 5 | −$2,151 | $2,551 | survives, losing |
+| 10 | −$4,302 | $5,102 | **account dead in 8.4 days** |
+| 20 | −$4,436 | $6,036 | **account dead in 4.2 days** |
+| 50 | — | $6,200 | **account dead in 1.7 days** |
+
+No contract count reaches +$9,000, because the per-trade edge is negative. Size
+only changes how fast the account dies.
+
+The $4,500 allowance is **room to lose**, not room to profit. Room to lose is
+worth having only when you are expected to win — it buys survival through
+variance, not through a negative mean.
+
+The same pattern appears in `src/backtest_150k_ciel.py` on a strategy that *does*
+backtest positive: it passes at 2 contracts, and dies at 5 and above. Scaling
+multiplies drawdown at exactly the rate it multiplies profit, so the ratio of
+target to drawdown is fixed by the strategy and cannot be bought with capital.
+
+**What a larger account is genuinely for:** a strategy whose per-trade edge is
+positive but whose instrument is too coarse to size properly on small capital.
+That is a real problem and larger capital is its real solution. It is not this
+system's problem. This system's problem is that the exit geometry gives back the
+edge before the target is reached — and that has to be fixed at one contract,
+and demonstrated over roughly fifty trades, before contract count is the
+question worth asking.
