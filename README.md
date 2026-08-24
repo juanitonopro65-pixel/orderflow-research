@@ -202,17 +202,20 @@ mate la cuenta, y sube cuando ya hay ganancia que la absorba.
 Con eso, la secuencia que el dato respalda:
 
 ```
-1. AHORA          paper/ corre gratis, ~6 semanas, ~50 trades por mercado
-2. CRITERIO       trigo PF >= 1.3 y oro >= 1.0   (escrito antes de mirar)
-3. SI PASA        cuenta chica, 1 contrato de cada uno -> mide slippage real
-4. SI LOS FILLS   coinciden con el papel -> la de $150k, que es donde el
-                  tamaño de cuenta deja de ser el cuello
-5. SI NO PASA     no se compró nada. Costo total: $0
+1. AHORA        paper/ corre gratis, ~6 semanas, ~50 trades por mercado
+2. CRITERIO     trigo PF >= 1.3 y oro >= 1.0   (escrito antes de mirar)
+3. SI PASA      la de $150k DIRECTO, escalera 1->2 con colchon de $1.500
+                (88.5%, ~3.8 meses, una sola cuota)
+4. SI NO PASA   no se compro nada. Costo total: $0
 ```
 
-El paso 3 no es para "probar la estrategia" — eso ya lo hizo el papel. Es para
-medir la diferencia entre papel y fill, que es el único número que el papel no
-puede darte y el que hundió al sistema anterior.
+Sin escalón intermedio: la cuenta de $25k costaría una segunda cuota y ~10 meses
+más de calendario para comprar información —el slippage— que el análisis de
+sensibilidad muestra que no es el riesgo dominante.
+
+Lo que **no** cambia: no se compra nada hasta que el papel valide el régimen
+actual. Los últimos 60 días dan trigo 1.06 y oro 0.84. Seis semanas de espera
+cuestan $0; comprar hoy y equivocarse cuesta la cuota.
 
 ## Estructura
 
