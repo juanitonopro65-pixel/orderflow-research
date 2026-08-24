@@ -141,6 +141,28 @@ medidos corresponden a ZW, el contrato grande. Los micros de granos son mucho m�
 nuevos y pueden ser bastante más delgados; si lo son, armar riesgo equivalente con
 10 micros costaría más slippage que operar un ZW.
 
+**Medición de liquidez (24-ago) — el micro NO es usable.** Volumen diario mediano:
+
+| contrato | volumen/día | vs ZW |
+|---|---:|---:|
+| **ZW** (entero) | **81,658** | 100% |
+| KE (Kansas City) | 37,467 | 46% |
+| XW (mini) | 707 | 0.9% |
+| MZW (micro) | 719 | 0.9% |
+
+El micro mueve el 1% del grande: ~2 contratos por minuto de sesión. Armar riesgo
+equivalente con 10 MZW sería una fracción enorme del volumen del minuto y se
+pagaría en slippage — justo la fricción que representa el 82% del costo real
+medido en este proyecto.
+
+**Conclusión: se opera ZW, el contrato entero.** El micro existe, pero no sirve.
+La fragilidad de "1 trade = 31% del colchón" en la cuenta de $25k es real, no un
+artefacto del supuesto.
+
+**Candidato nuevo sin analizar: KE**, trigo de Kansas City, 37,467 contratos/día.
+Es otra variedad de trigo con su propio mercado y liquidez sobrada.
+
+
 ### ⚠️ Pero el régimen reciente contradice esas cifras
 
 Corriendo el mismo motor sobre los **últimos 60 días**:
