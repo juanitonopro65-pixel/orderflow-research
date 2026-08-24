@@ -11,6 +11,18 @@ included so every figure can be recomputed.**
 
 ---
 
+## Two strategies, opposite results
+
+This repository holds two systems. Conflating them is the easiest mistake to make:
+
+- **OF-MGC** — an order-flow scalp. Traded real money. **Lost $430.20.**
+- **Ciel** — trend-following plus range fade. **Never traded real money.**
+  Positive expectancy in backtest (+$12.97/trade, profitable in each of three
+  years independently), and the strategy actually intended for a large account.
+  See [docs/CIEL.md](docs/CIEL.md).
+
+Everything below concerns OF-MGC, the one that was deployed.
+
 ## The headline
 
 | | trades | win rate | net |
