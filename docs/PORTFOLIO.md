@@ -70,8 +70,18 @@ Trigo ZW    ATR mediano 3.00 pts -> stop 5.25 pts -> riesgo $262 por contrato en
 Oro MGC     ATR mediano 11.6 pts -> stop 20.3 pts -> riesgo $203 por micro
 ```
 
-Los dos caen dentro de la banda $150–400 naturalmente. No hace falta micro de
-trigo ni fracciones de contrato.
+Los dos caen dentro de la banda $150–400 naturalmente con el contrato entero.
+
+**Corrección (24-ago):** sí existe micro de trigo — **MZW** (500 bushels, $5/punto,
+riesgo ~$26 con este stop) y **XW** mini (1.000 bushels, $10/punto). Una versión
+anterior decía lo contrario. Con micros el dimensionamiento deja de ser un salto de
+$262 y pasa a ser ajustable de a $26, lo que cambia el análisis de las cuentas
+chicas: la fragilidad de "1 trade = 31% del aire" en la $25k es un artefacto de
+usar el contrato grande, no una restricción real.
+
+Queda por medir la **liquidez de MZW** — la cifra de 6.700–11.900 contratos/hora es
+de ZW. También aparecen **KE** (trigo Kansas City) y **HRS** (Hard Red Spring) como
+mercados vecinos sin analizar.
 
 ## ⚠️ Advertencia: el régimen reciente contradice estas cifras
 

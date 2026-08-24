@@ -128,7 +128,18 @@ Trigo ZW   ATR mediano 3.00 pts -> stop 5.25 pts -> riesgo $262 por contrato ent
 Oro MGC    ATR mediano 11.6 pts -> stop 20.3 pts -> riesgo $203 por micro
 ```
 
-Los dos caen dentro de la banda $150–400. No hace falta micro de trigo.
+Los dos caen dentro de la banda $150–400 con un contrato entero de cada uno.
+
+**Corrección (24-ago):** existe **MZW, Micro Wheat Futures** (500 bushels, $5 por
+punto), además de **XW** mini (1.000 bushels, $10). Una versión anterior de este
+documento afirmaba que no había micro de trigo — era falso. Con MZW el riesgo por
+contrato baja a ~$26: granularidad fina en vez de saltos de $262. Eso importa
+sobre todo en cuentas chicas, donde un ZW se come el 31% del colchón.
+
+Pendiente de medir: la **liquidez del MZW**. Los 6.700–11.900 contratos/hora
+medidos corresponden a ZW, el contrato grande. Los micros de granos son mucho más
+nuevos y pueden ser bastante más delgados; si lo son, armar riesgo equivalente con
+10 micros costaría más slippage que operar un ZW.
 
 ### ⚠️ Pero el régimen reciente contradice esas cifras
 
