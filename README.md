@@ -94,8 +94,6 @@ Medido, no supuesto:
 
 ---
 
----
-
 ## El trigo: el segundo mercado
 
 La velocidad para pasar una evaluación es `objetivo / edge diario`. La
