@@ -1,112 +1,120 @@
 # orderflow-research
 
-An algorithmic futures trading system: live-market data bridges, an order-flow
-signal engine, a paper simulator, a guarded live executor, and the backtests
-used to decide what got deployed.
+Sistema de trading algorítmico sobre futuros: puentes de datos en vivo contra la
+plataforma del bróker, motor de señales de order flow, simulador en papel,
+ejecutor con guardas, y los backtests que decidieron qué se desplegaba.
 
-Built solo. Traded real money on Micro Gold futures (MGC) through Quantower.
+Construido solo. Operó **dinero real** sobre futuros de oro micro (MGC) a través
+de Quantower.
 
-**It lost money. This repository documents exactly why, with the raw ledger
-included so every figure can be recomputed.**
+**Perdió plata. Este repositorio documenta exactamente por qué, con el registro
+crudo incluido para que cada cifra se pueda recalcular desde la fuente.**
 
 ---
 
-## Two strategies, opposite results
+## Dos estrategias, resultados opuestos
 
-This repository holds two systems. Conflating them is the easiest mistake to make:
+Acá viven dos sistemas distintos. Confundirlos es el error más fácil de cometer:
 
-- **OF-MGC** — an order-flow scalp. Traded real money. **Lost $430.20.**
-- **Ciel** — trend-following plus range fade. **Never traded real money.**
-  Positive expectancy in backtest (+$12.97/trade, profitable in each of three
-  years independently), and the strategy actually intended for a large account.
-  See [docs/CIEL.md](docs/CIEL.md).
+- **OF-MGC** — scalp de order flow. Operó dinero real. **Perdió $430.20.**
+- **Ciel** — seguimiento de tendencia + fade en rango. **Nunca operó dinero real.**
+  Expectativa positiva en backtest (+$12.97/trade, rentable en cada uno de tres
+  años por separado). Es la estrategia pensada para una cuenta grande.
 
-Everything below concerns OF-MGC, the one that was deployed.
+| | OF-MGC | Ciel |
+|---|---|---|
+| trades por día | ~9 | ~1.2 |
+| duración | 25 minutos | hasta 8 horas |
+| por trade | **−$5.74** (real) | **+$12.97** (backtest) |
+| aciertos | 38.7% | 58.4% |
+| profit factor | < 1 | 1.17 |
 
-## The headline
+---
 
-| | trades | win rate | net |
+## Lo que pasó con dinero real
+
+| | trades | aciertos | neto |
 |---|---|---|---|
-| Dry-run — *the sample the go-live decision was based on* | 13 | 69.2% | **+$288.00** |
-| **Live, real money** (20–30 Jul 2026) | **75** | **38.7%** | **−$430.20** |
+| Dry-run — *la muestra con la que se decidió operar* | 13 | 69.2% | **+$288.00** |
+| **En vivo** (20–30 jul 2026) | **75** | **38.7%** | **−$430.20** |
 
 ```bash
-python analysis/live_results.py     # reproduces every number in docs/RESULTS.md
+python analysis/live_results.py     # recalcula cada cifra de docs/RESULTS.md
 ```
 
-Two things worth knowing before reading further, because both are the kind of
-error that survives if nobody writes it down:
+Dos cosas antes de seguir, porque las dos son errores que sobreviven si nadie
+los escribe:
 
-**1. The ledger was contaminated.** Four synthetic unit-test rows (fixture price
-`entry 4000.0`; one with the timestamp literally `t`) sat inside the live ledger
-and inflated it by $157. A first pass over this data reported −$273.20. The real
-figure is −$430.20. `analysis/live_results.py` filters them in code you can read.
+**1. El registro estaba contaminado.** Cuatro filas de prueba unitaria (precio
+de fixture `entry 4000.0`; una con el timestamp literalmente en `t`) estaban
+dentro del ledger en vivo e inflaban el resultado en $157. Una primera lectura
+reportó −$273.20. La cifra real es −$430.20.
 
-**2. The simulated log and reality disagree violently.** For 27–30 July the
-signal log totals **+$12,062**; over those same four days the real account lost
-**$370**. The simulator counted the same market move up to ten times over,
-and recorded +$600 winners that reached target in five minutes — sixty points of
-gold in five minutes, which does not happen. See [docs/METHOD.md](docs/METHOD.md).
+**2. El log simulado y la realidad se contradicen brutalmente.** Del 27 al 30 de
+julio el log de señales suma **+$12,062**; esos mismos cuatro días la cuenta real
+perdió **$370**. El simulador contaba el mismo movimiento hasta diez veces, y
+registraba ganadores de +$600 que llegaban al objetivo en cinco minutos —sesenta
+puntos de oro en cinco minutos, que no ocurre—.
 
 ---
 
-## Why it lost — the actual mechanism
+## Por qué perdió — el mecanismo real
 
-The system was designed as a scalp: 6-point stop (−$60), 9-point target (+$90),
-forced exit after 25 minutes. That is a 1 : 1.5 payoff needing a 40% win rate.
+Se diseñó como scalp: stop de 6 puntos (−$60), objetivo de 9 (+$90), salida
+forzada a los 25 minutos. Eso es un payoff 1:1.5 que necesita 40% de aciertos.
 
-What ran was not that system:
+Lo que corrió no era ese sistema:
 
 ```
-exit reason      TIME(26m)=35   SL=26   TIME(25m)=5   TP=9
-reached target    9 / 75  (12%)
-closed on clock  40 / 75  (53%)
+motivo de salida   TIEMPO(26m)=35   SL=26   TIEMPO(25m)=5   TP=9
+llegó al objetivo    9 / 75  (12%)
+cerró por reloj     40 / 75  (53%)
 ```
 
-**Only 12% of trades ever reached the target.** The 25-minute clock closed more
-than half of them wherever price happened to be. So the realised payoff was not
-1 : 1.5 but **1.23 : 1**, which needs a **44.9%** win rate to break even. The
-system delivered 38.7%.
+**Solo el 12% de los trades llegó al objetivo.** El reloj cerró más de la mitad
+donde el precio estuviera. Así el payoff real no fue 1:1.5 sino **1.23:1**, que
+necesita **44.9%** de aciertos. El sistema entregó 38.7%.
 
-The gap is 6.2 points of win rate — and it is a *geometry* problem, not a
-signal-strength problem. A target the clock never lets you reach is not a target.
+La brecha son 6.2 puntos, y es un problema de **geometría**, no de fuerza de la
+señal. Un objetivo que el reloj nunca deja alcanzar no es un objetivo.
 
-### What is *not* the explanation
+### Lo que *no* lo explica
 
-Measured, not assumed:
+Medido, no supuesto:
 
-- **Commission.** $0.60 round-turn, not the $2.60 the paper simulator charged.
-  18% of the friction. Real transaction cost is $3.39/trade, and 82% of that is
-  slippage — mostly stop slippage (mean $3.60, tail to $29).
-- **Entry slippage is structural, not noise.** The executor anchors the bracket
-  to the reference ask/bid and then fills at market, so any difference between
-  reference and fill shifts the *real* distance to target 1:1
-  (`src/agus_ejecutor_of_mgc.py`). One tick, every trade.
-- **Limit entries would be worse.** The obvious fix is measured as harmful:
-  adverse selection removes the trades that never come back — the good ones.
-- **Gross P&L before any cost was already negative.** Costs made a losing system
-  lose faster. They did not cause the loss.
+- **Comisión.** $0.60 ida y vuelta, no los $2.60 que cobraba el simulador. Es el
+  18% de la fricción. El costo real es $3.39/trade y el 82% es slippage.
+- **El slippage de entrada es estructural.** El ejecutor ancla el bracket al
+  ask/bid de referencia y después llena a mercado, así que cualquier diferencia
+  desplaza la distancia real al objetivo 1:1. Un tick, cada trade.
+- **Entrar con órdenes límite sería peor.** Medido: la selección adversa elimina
+  los trades que nunca vuelven, que son los buenos.
+- **El P&L bruto antes de costos ya era negativo.** Los costos hicieron que un
+  sistema perdedor perdiera más rápido. No causaron la pérdida.
 
 ---
 
-## Repository layout
+## Estructura
 
 ```
-src/         the system — executor, paper simulator, backtests
-data/        raw evidence: 34,276 one-minute bars with order flow,
-             7,657 logged signals, the complete live trade ledger
-analysis/    scripts that regenerate every published figure
-docs/        architecture, results, and the research record
+src/         el sistema: ejecutor, simulador, backtests
+data/        evidencia cruda: 34,276 velas de 1 minuto con order flow,
+             7,657 señales registradas, el ledger completo de trades reales
+analysis/    scripts que regeneran cada cifra publicada
+paper/       test forward en papel de Ciel sobre trigo y oro
+docs/        arquitectura, resultados y el registro de investigación
 ```
 
-- [docs/RESULTS.md](docs/RESULTS.md) — every number, and how it was obtained
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — how the system is built
-- [docs/METHOD.md](docs/METHOD.md) — hypotheses tested and killed, and the
-  measurement traps that produced false positives along the way
+- [docs/RESULTS.md](docs/RESULTS.md) — cada número y cómo se obtuvo
+- [docs/CIEL.md](docs/CIEL.md) — la estrategia que nunca se desplegó
+- [docs/PORTFOLIO.md](docs/PORTFOLIO.md) — cómo acelerar: el segundo mercado
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — cómo está construido
+- [docs/METHOD.md](docs/METHOD.md) — hipótesis probadas y descartadas, y las
+  trampas de medición que produjeron falsos positivos
 
-## Status
+## Estado
 
-Not running. Halted 30 July 2026. Nothing here is a recommendation to trade, and
-the results argue against deploying this system as it stands.
+Detenido desde el 30 de julio de 2026. Nada acá es una recomendación de operar,
+y los resultados argumentan en contra de desplegar OF-MGC como está.
 
-The engineering is reusable; the strategy is not yet profitable.
+La ingeniería es reutilizable; la estrategia todavía no es rentable.

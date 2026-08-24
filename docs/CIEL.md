@@ -1,101 +1,95 @@
-# Ciel — the other strategy
+# Ciel — la otra estrategia
 
-**This is not the system that lost money.** Two separate strategies live in this
-repository and they have opposite profiles:
+**Esta no es la que perdió plata.** En este repositorio viven dos estrategias
+separadas y tienen perfiles opuestos:
 
 | | OF-MGC | Ciel |
 |---|---|---|
-| what | order-flow divergence scalp | trend-following + range fade |
-| holding time | 25 minutes | up to 8 hours |
-| trades per day | ~9 | ~1.2 |
-| traded real money | yes | **never** |
-| expectancy / trade | **−$5.74** (live) | **+$12.97** (backtest) |
-| win rate | 38.7% | 58.4% |
+| qué es | scalp de divergencia de order flow | tendencia + fade en rango |
+| duración | 25 minutos | hasta 8 horas |
+| trades por día | ~9 | ~1.2 |
+| operó dinero real | sí | **nunca** |
+| por trade | **−$5.74** (en vivo) | **+$12.97** (backtest) |
+| aciertos | 38.7% | 58.4% |
 | profit factor | < 1 | 1.17 |
 
-OF-MGC was deployed and lost $430. Ciel was shelved *before* deployment on the
-grounds that a micro gold contract is too coarse an instrument for a $25k
-account — its stops are 15–40 points ($150–400), which on $25k is three bullets.
-That reasoning is why it is being reconsidered for a $150k account.
+OF-MGC se desplegó y perdió $430. Ciel se guardó *antes* de desplegarse, con el
+argumento de que el micro de oro es un instrumento demasiado grueso para una
+cuenta de $25k — sus stops son de 15 a 40 puntos ($150–400), que sobre $25k son
+tres balas. Ese razonamiento es la razón por la que se reconsidera para $150k.
 
-## The measured edge
+## El edge medido
 
-`src/backtest_combo_eval.py` over GC=F, two years, one trade at a time,
-$5.00/trade cost deducted:
+`src/backtest_combo_eval.py` sobre GC=F, dos años, un trade a la vez, con $5.00
+de costo descontado por operación:
 
 ```
-TREND   161 trades   55.9% WR   +$3,364   PF 1.20   +$20.90/trade
-FADE    214 trades   60.3% WR   +$1,498   PF 1.13    +$7.00/trade
-COMBO   375 trades   58.4% WR   +$4,863   PF 1.17   +$12.97/trade
+TREND   161 trades   55.9% aciertos   +$3,364   PF 1.20   +$20.90/trade
+FADE    214 trades   60.3% aciertos   +$1,498   PF 1.13    +$7.00/trade
+COMBO   375 trades   58.4% aciertos   +$4,863   PF 1.17   +$12.97/trade
 ```
 
-Positive in each year independently — the test OF-MGC failed:
+Positivo en cada año por separado — el test que OF-MGC reprobó:
 
-| year | trades | win rate | net |
+| año | trades | aciertos | neto |
 |---|---:|---:|---:|
 | 2024 | 133 | 56.4% | +$803 |
 | 2025 | 143 | 62.2% | +$2,508 |
 | 2026 | 99 | 55.6% | +$1,552 |
 
-The two halves are regime-exclusive: trend only fires on directional days, fade
-only on ranging ones, so they never compete for the same capital and the combined
-figure is not double-counting. The engine checks stop before target within the
-same bar, which is the conservative resolution.
+Las dos mitades son excluyentes por régimen: trend solo dispara en días
+direccionales, fade solo en días laterales, así que nunca compiten por el mismo
+capital y la cifra combinada no está contando doble. El motor comprueba el stop
+antes que el objetivo dentro de la misma vela, que es la resolución conservadora.
 
-## Can it pass a $150k evaluation?
+## ¿Puede pasar una evaluación de $150k?
 
-Target +$9,000, max loss $4,500 end-of-day trailing. The single-path backtest
-says "passes at 2 contracts in 11.5 months" — but that is **one draw**.
-Bootstrapping the real daily distribution over 6,000 runs gives the honest answer:
+Objetivo +$9,000, pérdida máxima $4,500 con trailing al cierre. El backtest de un
+solo camino dice "pasa con 2 contratos en 11.5 meses" — pero eso es **una sola
+tirada**. Haciendo bootstrap de la distribución diaria real sobre 6,000
+simulaciones:
 
-| plan | P(pass) | median months |
+| plan | P(pasar) | meses (mediana) |
 |---|---:|---:|
-| 1 contract fixed | 58.4% | 15.8 |
-| **1 → 2 after a $1,500 cushion** | **58.8%** | **9.5** |
-| 2 contracts fixed | 50.6% | 6.5 |
-| 3 contracts fixed | 40.4% | 3.1 |
-| 5 contracts fixed | 33.1% | 1.3 |
+| 1 contrato fijo | 18.6% | 18.9 |
+| escalera 1 → 2 con colchón de $1,500 | 38.6% | 13.1 |
 
-**Roughly 59%, in roughly nine months.** More size buys speed and costs
-probability — the target/drawdown ratio is fixed by the strategy, so contracts
-only decide how fast the outcome arrives.
+Solo con oro, es una propuesta pobre. La ruta que sí funciona pasa por agregar un
+segundo mercado descorrelacionado — está en [PORTFOLIO.md](PORTFOLIO.md).
 
-The ladder is the one free improvement found: same probability as staying at one
-contract, but it arrives in nine months instead of sixteen. Early variance
-cannot kill the account because size is small; later variance is absorbed by
-realised profit.
+### Lo que no funciona acá
 
-### What does not work here
+Un freno de pérdida diaria — la guarda que sí ayudó medible a OF-MGC (PF 1.15 →
+1.21) — no hace casi nada por Ciel. A $450 y $600 se activa en **cero de 317
+días**. La razón es estructural: Ciel toma 1.2 trades por día, así que un freno
+diario no tiene trades posteriores que impedir. No puede parar el trade que lo
+rompe, solo los que vienen después — y normalmente no hay ninguno.
 
-A daily loss brake — the guard that measurably helped OF-MGC (PF 1.15 → 1.21) —
-does almost nothing for Ciel. At $450 and $600 it triggers on **zero of 317
-days**. The reason is structural: Ciel takes 1.2 trades per day, so a daily
-brake has no subsequent trades to prevent. It cannot stop the trade that
-breaches it, only the ones after — and there usually are none.
+Un freno de $300 sí ayuda algo (+$4,863 → +$5,744 crudo, cortando 12 días malos),
+pero es un efecto chico, no una solución.
 
-A $300 brake does help (58.4% → 58.7%, and raw P&L +$4,863 → +$5,744 by cutting
-12 bad days), but it is a small effect, not a fix.
+## Qué es y qué no es
 
-## What this is and is not
+**Es:** una estrategia con expectativa positiva, consistente en tres años, cuyos
+dos componentes funcionan por separado.
 
-**Is:** a strategy with positive expectancy, consistent across three years, whose
-two components work independently, with a defined plan giving it a ~59% chance
-at a $150k evaluation over about nine months.
+**No es:** algo probado. Ciel nunca llenó una orden real. En concreto:
 
-**Is not:** proven. Ciel has never filled a real order. Specifically:
+- El backtest corre sobre velas horarias de GC=F desde Yahoo, un proxy del MGC.
+  El recorrido dentro de la vela es desconocido; la resolución es conservadora
+  pero sigue siendo un supuesto.
+- El forward de su configuración con gate (A+) devolvió **−$231 en 7 trades**.
+  Es una muestra demasiado chica para concluir nada, y además es una
+  configuración más restrictiva que la que se backtestea acá. Se registra porque
+  omitirlo sería deshonesto, no porque sea decisivo.
+- **En los últimos 60 días el oro cae a PF 0.84, negativo.** El promedio de dos
+  años no es la expectativa de hoy. Ver la advertencia en
+  [PORTFOLIO.md](PORTFOLIO.md).
+- El costo es plano de $5.00/trade. El slippage medido en otra parte de este
+  proyecto tenía cola gorda (peor caso $29 sobre un stop de 6 puntos). Los stops
+  de Ciel son más anchos, así que el impacto proporcional es menor, pero la cola
+  no se modeló.
 
-- The backtest runs on GC=F hourly bars from Yahoo, a proxy for MGC. Intrabar
-  path is unknown; the resolution is conservative but it is still an assumption.
-- The live forward test of its gated (A+) configuration returned **−$231 over 7
-  trades**. That is a sample far too small to conclude anything, and it is also
-  a more restrictive configuration than the one backtested here. It is recorded
-  because omitting it would be dishonest, not because it is decisive.
-- Cost is a flat $5.00/trade. Measured slippage elsewhere in this project had a
-  fat tail (worst $29 on a 6-point stop). Ciel's stops are wider so the
-  proportional impact is smaller, but the tail was not modelled.
-- 59% is a coin flip with an edge. It is a bet with favourable odds over a long
-  horizon, not a system that reliably delivers.
-
-**The honest sentence:** the edge appears real and survives the tests that killed
-the other strategy, but it has never met a real fill, and the plan is a
-nine-month bet at rather better than even odds.
+**La frase honesta:** el edge parece real y sobrevive los tests que mataron a la
+otra estrategia, pero nunca se encontró con un fill real, y el régimen de los
+últimos dos meses está por debajo de su promedio histórico.

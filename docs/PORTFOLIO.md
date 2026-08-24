@@ -1,106 +1,125 @@
-# Going faster: the second market
+# Ir más rápido: el segundo mercado
 
-Nine months to pass an evaluation is a long time to ask anyone to wait. This
-documents the search for a faster route and what it actually costs.
+Nueve meses para pasar una evaluación es mucho tiempo para pedirle a alguien que
+espere. Esto documenta la búsqueda de una ruta más rápida y lo que cuesta.
 
-## First, a correction
+## Primero, una corrección
 
-An earlier pass reported Ciel at "~59% probability in 9.5 months." That number
-sampled only **days the strategy traded**, which silently assumes every calendar
-day produces a trade. Ciel trades 317 of 511 calendar days. Modelled correctly,
-with non-trading days included as zeros:
+Una versión anterior reportó Ciel con "~59% de probabilidad en 9.5 meses". Ese
+número muestreaba solo los **días en que la estrategia operó**, lo que asume en
+silencio que todos los días calendario producen trade. Ciel opera 317 de 511
+días. Modelado bien, con los días sin operar contados como cero:
 
 ```
-Ciel on gold alone, 1 contract:   18.6% probability, 18.9 months
-Ciel on gold alone, 1->2 ladder:  38.6% probability, 13.1 months
+Ciel solo en oro, 1 contrato:   18.6% de probabilidad, 18.9 meses
+Ciel solo en oro, escalera 1->2: 38.6% de probabilidad, 13.1 meses
 ```
 
-Considerably worse. The correction matters more than the original figure did.
+Bastante peor. La corrección importa más que la cifra original.
 
-## Why more contracts cannot fix it
+## Por qué más contratos no puede arreglarlo
 
-Speed is `target / daily edge`. Probability is driven by `daily edge / daily
-volatility`. Adding contracts multiplies **both** edge and volatility, so it buys
-speed and pays for it in probability — the ratio is untouched.
+La velocidad es `objetivo / edge diario`. La probabilidad la manda
+`edge diario / volatilidad diaria`. Sumar contratos multiplica **las dos cosas**,
+así que compra velocidad y la paga en probabilidad — la proporción no se toca.
 
-The only way to improve both at once is to raise edge *without* raising
-volatility proportionally. Adding an **uncorrelated** market does exactly that:
-edge adds linearly, volatility adds in quadrature.
+La única forma de mejorar ambas es subir el edge *sin* subir la volatilidad en la
+misma medida. Agregar un mercado **descorrelacionado** hace exactamente eso: el
+edge suma lineal, la volatilidad suma en cuadratura.
 
-## Searching for a second market
+## Buscando un segundo mercado
 
-The Ciel engine was run unchanged on eight instruments. The stop clamp — the
-original caps stop distance to 15–40 points on gold at $10/point — was expressed
-as its dollar equivalent, $150–400 of risk, and converted back to points per
-instrument. That preserves the volatility-aware sizing rather than removing it.
+Se corrió el motor de Ciel sin cambios sobre ocho instrumentos. El recorte del
+stop —el original limita la distancia a 15–40 puntos en oro a $10/punto— se
+expresó como su equivalente en dólares, $150–400 de riesgo, y se convirtió de
+vuelta a puntos para cada instrumento. Eso preserva el dimensionamiento
+consciente de volatilidad en vez de eliminarlo.
 
-Verification that the port is faithful: gold reproduces the original exactly
-(375 trades, 58.4% WR, +$4,863, PF 1.17, identical yearly split).
+Verificación de que el port es fiel: el oro reproduce el original exacto
+(375 trades, 58.4% de aciertos, +$4,863, PF 1.17, mismo desglose anual).
 
-| market | trades | win rate | net | PF | 2024 / 2025 / 2026 |
+| mercado | trades | aciertos | neto | PF | 2024 / 2025 / 2026 |
 |---|---:|---:|---:|---:|---|
-| **Wheat (ZW)** | 511 | 65.4% | **+$28,031** | **1.77** | +16,479 / +7,031 / +4,521 |
-| **Gold (MGC)** | 375 | 58.4% | +$4,863 | 1.17 | +803 / +2,508 / +1,552 |
-| Silver | 383 | 60.8% | +$3,533 | 1.10 | negative in 2024 |
-| Copper | 373 | 54.4% | +$1,048 | 1.03 | negative in 2025 |
-| Crude, Nasdaq, S&P, NatGas | — | — | all negative | 0.74–0.86 | — |
+| **Trigo (ZW)** | 511 | 65.4% | **+$28,031** | **1.77** | +16,479 / +7,031 / +4,521 |
+| **Oro (MGC)** | 375 | 58.4% | +$4,863 | 1.17 | +803 / +2,508 / +1,552 |
+| Plata | 383 | 60.8% | +$3,533 | 1.10 | negativo en 2024 |
+| Cobre | 373 | 54.4% | +$1,048 | 1.03 | negativo en 2025 |
+| Petróleo, Nasdaq, S&P, Gas | — | — | todos negativos | 0.74–0.86 | — |
 
-Only gold and wheat are positive in all three years independently.
+Solo oro y trigo son positivos en los tres años por separado.
 
-**Their daily P&L correlation is r = −0.004.** Independent, which is what makes
-the combination work rather than just doubling exposure.
+**Su correlación de P&L diario es r = −0.004.** Independientes, que es lo que
+hace que la combinación funcione en vez de ser solo el doble de exposición.
 
-## The portfolio
+## La cartera
 
-| plan | P(pass) | median months |
+| plan | P(pasar) | meses (mediana) |
 |---|---:|---:|
-| gold only, 1 contract | 18.6% | 18.9 |
-| gold only, 1→2 ladder | 38.6% | 13.1 |
-| **gold + wheat, 1 contract each** | **97.6%** | **6.5** |
-| gold + wheat, 1→2 ladder | 88.5% | 3.8 |
-| **gold + wheat, 2 contracts each** | **81.7%** | **2.8** |
-| gold + wheat, 3 contracts each | 67.6% | 1.5 |
+| solo oro, 1 contrato | 18.6% | 18.9 |
+| solo oro, escalera 1→2 | 38.6% | 13.1 |
+| **oro + trigo, 1 contrato c/u** | **97.6%** | **6.5** |
+| oro + trigo, escalera 1→2 | 88.5% | 3.8 |
+| **oro + trigo, 2 contratos c/u** | **81.7%** | **2.8** |
+| oro + trigo, 3 contratos c/u | 67.6% | 1.5 |
 
-Contract sizing is practical at 1 contract each — this was checked, not assumed:
+El dimensionamiento es práctico con 1 contrato de cada uno — verificado, no
+supuesto:
 
 ```
-Wheat ZW    median ATR 3.00 pts -> stop 5.25 pts -> risk $262 per full contract
-Gold MGC    median ATR 11.6 pts -> stop 20.3 pts -> risk $203 per micro
+Trigo ZW    ATR mediano 3.00 pts -> stop 5.25 pts -> riesgo $262 por contrato entero
+Oro MGC     ATR mediano 11.6 pts -> stop 20.3 pts -> riesgo $203 por micro
 ```
 
-Both land inside the $150–400 band naturally. No micro wheat contract is needed,
-and no fractional sizing is required.
+Los dos caen dentro de la banda $150–400 naturalmente. No hace falta micro de
+trigo ni fracciones de contrato.
 
-## What is not established
+## ⚠️ Advertencia: el régimen reciente contradice estas cifras
 
-Wheat has never been traded. Specifically:
+Las probabilidades de arriba se calcularon sobre dos años de datos. Al correr el
+motor verificado sobre los **últimos 60 días**:
 
-- **The edge declines year over year**: +$16,479 → +$7,031 → +$4,521. 2024 is
-  59% of the total. That decay is the single biggest reason not to size up on it.
-  In mitigation, even the weakest wheat year (2026, +$4,521) is close to gold's
-  entire two-year total.
-- **Eight instruments were tested and the best one was selected.** That is the
-  multiple-comparisons trap this project has documented before. Being positive in
-  all three years independently is what separates this from a lucky draw, but it
-  is not the same as out-of-sample confirmation.
-- Cost is assumed flat at $5.00/trade. Wheat's liquidity in the traded window is
-  adequate (6,700–11,900 contracts/hour, and the engine never touches the thin
-  overnight session), but its slippage distribution has not been measured the way
-  gold's was.
-- Yahoo hourly bars, as everywhere else in this analysis.
+| mercado | últimos 60 días | promedio 2 años |
+|---|---|---|
+| Trigo | 34t, 61.8%, PF **1.06** | 511t, 65.4%, PF **1.77** |
+| Oro | 25t, 52.0%, PF **0.84** | 375t, 58.4%, PF **1.17** |
 
-**Before sizing on wheat:** paper-trade it forward against live fills for ~50
-trades, as with any strategy here. The number that matters is whether the 2026
-rate holds, not the 2024 one.
+**Los dos están muy por debajo de su promedio, y el oro está en negativo.**
 
-## The honest recommendation
+Si el régimen actual es el que muestran estos 60 días, las probabilidades reales
+son bastante peores que 81.7%. Esto no invalida el resultado de diversificación
+—que es aritmética— pero sí invalida usar los números de dos años como si fueran
+la expectativa de hoy.
 
-The diversification result is the robust part: two uncorrelated markets improve
-both speed and probability simultaneously, and that is arithmetic, not a
-backtest artefact. The specific choice of wheat is a candidate, not a
-conclusion.
+Es exactamente por esto que existe [`paper/`](../paper/): medir el régimen
+vigente antes de arriesgar la cuota de una evaluación.
 
-If wheat validates forward, **2 contracts each — 82% in under three months** —
-is the plan that answers the original objection. If it does not, gold alone is
-an 18.6% proposition over nineteen months, and that is not worth anyone's
-capital.
+## Lo que no está establecido
+
+El trigo nunca se operó. En concreto:
+
+- **El edge decae año a año**: +$16,479 → +$7,031 → +$4,521, y los últimos 60
+  días dan PF 1.06. 2024 es el 59% del total. Esa caída es la razón principal
+  para no cargarle tamaño.
+- **Se probaron ocho instrumentos y se eligió el mejor.** Es la trampa de
+  comparaciones múltiples que este proyecto ya documentó. Ser positivo en los
+  tres años por separado lo distingue de un golpe de suerte, pero no equivale a
+  confirmación fuera de muestra.
+- El costo se asume plano en $5.00/trade. La liquidez del trigo en la ventana
+  operada es adecuada (6,700–11,900 contratos/hora, y el motor nunca toca la
+  sesión nocturna delgada), pero su distribución de slippage no se midió como sí
+  se midió la del oro. En el sistema real, el slippage fue el **82%** de la
+  fricción — así que este es el supuesto más frágil.
+- Velas horarias de Yahoo, como en todo el resto del análisis.
+
+## La recomendación honesta
+
+El resultado de diversificación es la parte robusta: dos mercados
+descorrelacionados mejoran velocidad y probabilidad a la vez, y eso es
+aritmética, no artefacto de backtest. La elección específica del trigo es un
+candidato, no una conclusión — y los últimos 60 días le bajan el pulgar.
+
+**Antes de poner tamaño:** correr `paper/ciel_paper.py` hacia adelante ~50 trades
+por mercado, con el criterio de decisión escrito de antemano (está en
+[`paper/README.md`](../paper/README.md)). Si el trigo sostiene PF ≥ 1.3, el plan
+de 2+2 contratos tiene la base que dice tener. Si no, oro solo es una propuesta
+del 18.6% a diecinueve meses, y eso no justifica el capital de nadie.
