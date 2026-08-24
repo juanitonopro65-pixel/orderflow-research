@@ -94,6 +94,91 @@ Medido, no supuesto:
 
 ---
 
+---
+
+## El trigo: el segundo mercado
+
+La velocidad para pasar una evaluación es `objetivo / edge diario`. La
+probabilidad la manda `edge / volatilidad`. Sumar contratos multiplica **las
+dos**, así que compra velocidad y la paga en probabilidad. Lo único que mejora
+ambas es agregar un mercado **descorrelacionado**: el edge suma lineal, la
+volatilidad suma en cuadratura.
+
+Se corrió el motor de Ciel **sin cambios** sobre ocho instrumentos, traduciendo
+el recorte del stop (15–40 puntos en oro a $10/punto) a su equivalente en riesgo,
+$150–400, para cada mercado. El oro reproduce el original exacto, que es la
+prueba de que el port es fiel.
+
+| mercado | trades | aciertos | neto | PF | 2024 / 2025 / 2026 |
+|---|---:|---:|---:|---:|---|
+| **Trigo (ZW)** | 511 | 65.4% | **+$28,031** | **1.77** | +16,479 / +7,031 / +4,521 |
+| **Oro (MGC)** | 375 | 58.4% | +$4,863 | 1.17 | +803 / +2,508 / +1,552 |
+| Plata | 383 | 60.8% | +$3,533 | 1.10 | negativo en 2024 |
+| Cobre | 373 | 54.4% | +$1,048 | 1.03 | negativo en 2025 |
+| Petróleo, Nasdaq, S&P, Gas | — | — | todos negativos | 0.74–0.86 | — |
+
+Solo oro y trigo son positivos en los tres años por separado. Su correlación de
+P&L diario es **r = −0.004**: independientes.
+
+Y el dimensionamiento sale natural, verificado y no supuesto:
+
+```
+Trigo ZW   ATR mediano 3.00 pts -> stop 5.25 pts -> riesgo $262 por contrato entero
+Oro MGC    ATR mediano 11.6 pts -> stop 20.3 pts -> riesgo $203 por micro
+```
+
+Los dos caen dentro de la banda $150–400. No hace falta micro de trigo.
+
+### ⚠️ Pero el régimen reciente contradice esas cifras
+
+Corriendo el mismo motor sobre los **últimos 60 días**:
+
+| mercado | últimos 60 días | promedio 2 años |
+|---|---|---|
+| Trigo | 34t, 61.8%, PF **1.06** | 511t, 65.4%, PF **1.77** |
+| Oro | 25t, 52.0%, PF **0.84** | 375t, 58.4%, PF **1.17** |
+
+Los dos muy por debajo de su promedio, y el oro en negativo. Coherente con el
+deterioro año a año del trigo. **Las probabilidades de abajo se calcularon sobre
+dos años y no son la expectativa de hoy.** Por eso existe [`paper/`](paper/):
+medir el régimen vigente antes de pagar nada.
+
+## Qué cuenta comprar, y en qué orden
+
+| cuenta | plan | P(pasar) | meses | fragilidad |
+|---|---|---:|---:|---|
+| $25k (aire $1,500) | oro+trigo 1x c/u | **80.8%** | **0.8** | 1 trade = 31% del aire |
+| $25k (aire $822) | oro+trigo 1x c/u | 55.1% | 0.6 | 1 trade = **57%** del aire |
+| $150k (aire $4,500) | oro+trigo 1x c/u | **97.8%** | 6.5 | 1 trade = 10% del aire |
+| $150k (aire $4,500) | oro+trigo 2x c/u | 81.6% | 2.8 | 1 trade = 21% del aire |
+
+Dos conclusiones prácticas:
+
+1. **El aire de la evaluación importa más que su tamaño.** La misma estrategia
+   pasa de 80.8% a 55.1% solo por bajar el colchón de $1,500 a $822. Al comprar,
+   comparar el *drawdown* permitido y si es estático o con trailing — no el
+   número grande del título.
+2. **Una evaluación pagada no es un entorno de pruebas.** No se "prueba" en ella:
+   se pasa o se pierde la cuota. Probar es lo que hace `paper/`, gratis. Lo que
+   sí compra una cuenta chica, y el papel no puede dar, son **fills reales y
+   slippage real** — que fue exactamente donde murió OF-MGC (dry-run 69% →
+   en vivo 38.7%).
+
+Con eso, la secuencia que el dato respalda:
+
+```
+1. AHORA          paper/ corre gratis, ~6 semanas, ~50 trades por mercado
+2. CRITERIO       trigo PF >= 1.3 y oro >= 1.0   (escrito antes de mirar)
+3. SI PASA        cuenta chica, 1 contrato de cada uno -> mide slippage real
+4. SI LOS FILLS   coinciden con el papel -> la de $150k, que es donde el
+                  tamaño de cuenta deja de ser el cuello
+5. SI NO PASA     no se compró nada. Costo total: $0
+```
+
+El paso 3 no es para "probar la estrategia" — eso ya lo hizo el papel. Es para
+medir la diferencia entre papel y fill, que es el único número que el papel no
+puede darte y el que hundió al sistema anterior.
+
 ## Estructura
 
 ```
