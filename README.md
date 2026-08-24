@@ -12,6 +12,9 @@ crudo incluido para que cada cifra se pueda recalcular desde la fuente.**
 
 ---
 
+> **¿Recién llegás?** Leé **[EMPEZAR.md](EMPEZAR.md)** — cómo clonarlo, qué hace
+> falta (Python 3.9, cero dependencias) y por dónde empezar a leer.
+
 ## Dos estrategias, resultados opuestos
 
 Acá viven dos sistemas distintos. Confundirlos es el error más fácil de cometer:
