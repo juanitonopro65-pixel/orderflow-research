@@ -164,6 +164,41 @@ Dos conclusiones prácticas:
    slippage real** — que fue exactamente donde murió OF-MGC (dry-run 69% →
    en vivo 38.7%).
 
+### ¿Justifica el desvío por la cuenta chica?
+
+El único argumento para comprar una $25k antes es medir slippage barato. Así que
+la pregunta correcta es cuánto slippage aguanta el plan antes de romperse
+(evaluación $150k, 2 contratos de cada uno):
+
+| costo/trade | PF trigo | PF oro | P(pasar) | |
+|---:|---:|---:|---:|---|
+| $5.00 | 1.77 | 1.17 | **81.7%** | supuesto del backtest |
+| $10.00 | 1.68 | 1.10 | 75.5% | |
+| $15.00 | 1.60 | 1.04 | 67.4% | ≈ lo medido en oro, escalado |
+| $20.00 | 1.52 | 0.97 | 58.4% | pesimista |
+| $30.00 | 1.37 | 0.86 | **38.3%** | acá se rompe |
+
+Referencia: en OF-MGC el costo real medido fue **$3.39 sobre un stop de $60**, o
+sea 5.6% del riesgo. Aplicado a los $262 de riesgo del trigo, eso son ~$15/trade
+— donde el plan todavía da 67%. Para romperlo, el slippage tendría que ser el 11%
+del riesgo, el doble de la tasa proporcional ya medida.
+
+**Conclusión: el riesgo de slippage no justifica pagar una segunda cuota.** El
+plan se degrada de forma gradual, no cae por un precipicio. Ir directo a la $150k
+es más rápido (2.8 meses contra 0.8 + 2.8 = 3.6), cuesta una cuota en vez de dos,
+y da la misma probabilidad.
+
+### Cuánto tamaño en la $150k
+
+| plan | P(pasar) | meses |
+|---|---:|---:|
+| 1 contrato de cada uno | **97.6%** | 6.5 |
+| **escalera 1 → 2 con colchón de $1,500** | **88.5%** | **3.8** |
+| 2 contratos de cada uno | 81.7% | 2.8 |
+
+La escalera es el mejor canje: arranca chico para que la varianza temprana no
+mate la cuenta, y sube cuando ya hay ganancia que la absorba.
+
 Con eso, la secuencia que el dato respalda:
 
 ```
