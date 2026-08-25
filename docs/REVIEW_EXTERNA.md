@@ -210,3 +210,74 @@ parámetros, y no prometer ingreso constante cuando el edge decae año a año.
 
 Lo que queda pendiente y es lo más urgente de su lista: **modelar la regla de
 consistencia**, porque todas las probabilidades publicadas la ignoran.
+
+---
+
+# Su implementación (integrada 24-ago)
+
+No entregó solo una review: **construyó las fases 2, 3 y 4 de su propio plan.**
+
+| archivo | qué es |
+|---|---|
+| `src/ciel_engine.py` | motor único — backtest, paper y ejecutor comparten esta lógica |
+| `src/agus_ejecutor_ciel.py` | el ejecutor que faltaba, con la regla de dos manos intacta |
+| `src/risk_lucid_flex.py` | MLL, consistencia, freno diario, escalera, flat 16:40 |
+| `src/sim_eval_lucid.py` | simulador de la evaluación, con bootstrap |
+| `src/bootstrap_portfolio.py`, `src/backtest_ciel_flat.py`, `src/ciel_markets.py` | soporte |
+| `analysis/compare_demo.py` | comparar demo contra paper |
+| `docs/TUTORIAL_CIEL.md`, `docs/QUANTOWER_CIEL.md` | guías de operación |
+
+Auditado antes de integrar: sin secretos, sin escrituras fuera del proyecto, sin
+`subprocess`/`eval`/`exec`. Solo sale a `localhost` (el bridge), Yahoo y el
+calendario de ForexFactory que el sistema ya usaba.
+
+Su ejecutor **conserva la regla de dos manos** y lo deja escrito en el código:
+*"EL ASISTENTE NUNCA CREA LIVE_*.txt"*. Sin flag corre en dry-run, y detecta el
+conflicto con `OF_LIVE_MGC.txt` (un carril por cuenta).
+
+## ✅ La consistencia no era el problema
+
+Modelada y simulada con todas las reglas juntas (flat 16:40, MLL, escalera, freno):
+
+```
+P(pasar) = 82.0%   mediana 97 días   (3.000 tiradas)
+peor DD $1,933–$2,295 sobre un límite de $4,500
+consistencia 12–27%, nunca cerca del techo del 50%
+```
+
+Con trades de $200–400 contra un objetivo de $9,000, ningún día llega a dominar
+el ciclo. La preocupación era metodológicamente correcta y el resultado
+tranquiliza — pero ahora está **demostrado** en vez de supuesto.
+
+## ⚠️ Su motor destapó una inflación en las cifras publicadas
+
+`backtest_combo_eval.py` original corría TREND y FADE como **dos pasadas
+independientes, cada una con su propia posición**. Su motor unificado tiene
+**una sola**. En los bordes de régimen —un trade de tendencia todavía abierto
+cuando el día siguiente es lateral y dispara un fade— el original contaba los dos.
+
+Eso es imposible con una cuenta real, y contradice la regla #1 de este
+repositorio: *un trade a la vez*. **Su versión es la correcta.**
+
+| mercado | publicado | 1 posición | **+ reglas Lucid** |
+|---|---|---|---|
+| Oro | 375t, +$4,863, PF **1.17** | 374t, +$4,068, PF 1.14 | **355t, +$2,814, PF 1.11** |
+| Trigo | 511t, +$28,031, PF **1.77** | sin cambio | **508t, +$21,940, PF 1.63** |
+
+El arreglo de posición única **solo afectó al oro** — en trigo el fade nunca se
+solapaba con el trend. Y las reglas de sesión pesan más de lo estimado antes:
+el trigo cae a PF 1.63, no se queda en 1.77.
+
+Por año, con reglas reales: oro 2024 +$267 · 2025 +$1,923 · **2026 +$625**;
+trigo 2024 +$14,118 · 2025 +$4,778 · **2026 +$3,045**.
+
+**El oro con reglas reales queda en PF 1.11 y +$625 en 2026.** Está al borde de
+no justificar su lugar en la cartera. La diversificación sigue siendo válida
+—correlación r ≈ 0 con el trigo— pero el aporte del oro es cada vez más flaco.
+
+## Verificación de que el refactor es fiel
+
+Su `paper/ciel_paper.py` reescrito sobre el motor único reproduce **al centavo**
+lo que daba la versión anterior sobre la misma ventana de 60 días:
+trigo 34t/61.8%/+$197.97, oro 25t/52.0%/−$423.64. Y `--check` del ejecutor habla
+con el bridge real (`MGC :8765 OK`).
