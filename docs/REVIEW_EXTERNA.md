@@ -76,6 +76,36 @@ esa trampa en `METHOD.md` y aun así la cometió. Su propuesta, correcta:
 2. Medir correlación diaria KE vs MGC
 3. Reemplazar ZW solo si KE es positivo en 3 años **y** en rolling de 60 días
 
+### ✅ Medido a raíz de su review: KE le gana a ZW, pero es el mismo trade
+
+`analysis/ke_wheat.py` corre el motor sobre KE con oro y ZW como controles. Los
+controles reproducen exacto lo publicado (oro 375t/+$4,863/PF 1.17; ZW
+511t/+$28,031/PF 1.77), así que el port es fiel.
+
+| mercado | trades | aciertos | neto | PF | maxDD | 2024/2025/2026 |
+|---|---:|---:|---:|---:|---:|---|
+| **KE** (Kansas City) | 531 | 66.5% | **+$36,575** | **1.94** | **$3,101** | +18,835 / +11,908 / +5,832 |
+| ZW (Chicago) | 511 | 65.4% | +$28,031 | 1.77 | $3,752 | +16,479 / +7,031 / +4,521 |
+
+KE gana en las tres dimensiones: profit factor, drawdown máximo y pendiente de
+decaimiento. Y su maxDD de $3,101 deja más margen bajo el MLL de $4,500.
+
+**Pero la correlación mata la idea de sumarlos:**
+
+```
+KE  vs ZW    r = +0.562     <- el MISMO trade con otro ticker
+KE  vs Oro   r = +0.063     <- independientes
+ZW  vs Oro   r = -0.019     <- independientes
+```
+
+Con r = 0.56 entre los dos trigos, correr ambos dobla el riesgo sin repartirlo.
+**KE debería REEMPLAZAR a ZW, no acompañarlo.** El par sigue siendo dos mercados:
+oro + un trigo.
+
+Advertencia que su propio punto sobre sesgo de selección obliga a hacer: ya van
+**nueve** mercados probados. Que KE le gane a ZW puede ser ruido. Antes de
+cambiar hay que verlo aguantar en rolling de 60 días, no solo en el total.
+
 ### Gate de régimen automático
 
 Hoy `paper/` es un reporte manual. Su propuesta lo convierte en interruptor:
