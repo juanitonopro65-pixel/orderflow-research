@@ -251,6 +251,34 @@ Lo que **no** cambia: no se compra nada hasta que el papel valide el régimen
 actual. Los últimos 60 días dan trigo 1.06 y oro 0.84. Seis semanas de espera
 cuestan $0; comprar hoy y equivocarse cuesta la cuota.
 
+## ⚠️ Review externa (24-ago) — corrige cifras de este documento
+
+Una developer revisó el repositorio y encontró que **el motor mantiene posiciones
+toda la noche** (timeout de 8 velas horarias), mientras que Lucid exige posición
+plana ~16:45 ET. Es decir: se estaban reportando resultados que una cuenta Lucid
+no habría podido obtener.
+
+Medido con flat forzado a las 16:40 ET y sin entradas después de las 15:00:
+
+| mercado | como se reporta arriba | corregido para Lucid |
+|---|---|---|
+| Oro | +$4,863, PF 1.17 | **+$3,774, PF 1.16** (−22%) |
+| Trigo | +$28,031, PF 1.77 | **+$26,183, PF 1.77** (−7%) |
+
+El edge sobrevive y el profit factor casi no se mueve, pero **las cifras de la
+derecha son las correctas para esta cuenta.**
+
+También señaló el hueco más grande del análisis: **la regla de consistencia de
+Lucid** (un día no puede aportar más del 50% del ciclo en la evaluación, 40% en la
+cuenta fondeada) **no está modelada en ningún cálculo de este repositorio**. Todas
+las probabilidades publicadas la ignoran, así que son cotas superiores.
+
+Y corrigió la secuencia: falta una **demo con el ejecutor** entre el paper y la
+evaluación. Saltársela es repetir el 69% dry → 38.7% live de OF-MGC.
+
+Review completa, con lo medido y lo que queda abierto:
+**[docs/REVIEW_EXTERNA.md](docs/REVIEW_EXTERNA.md)**
+
 ## Estructura
 
 ```
